@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_IMAGE = "santhosh27/ciicd:${BUILD_NUMBER}"
+        GIT_REPO_NAME = "task2"
+        GIT_USER_NAME = "me-santhosh"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out the code'
+                git branch: env.BRANCH_NAME, url: 'https://github.com/me-santhosh/task2'
+            }
+        }
+        
+        stage('Build and Test Node.js') {
+            steps {
+                echo 'Building and testing Node.js'
+                sh 'npm install && npm test'
+            }
+        }
+        
+        stage('Build and Push Docker Image for Node.js') {
+            steps {
+                echo 'Building and pushing Docker image for Node.js'
+                sh 'docker build -t ${DOCKER_IMAGE} .'
+                withDockerRegistry([credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/']) {
+                    sh 'docker push ${DOCKER_IMAGE}'
+                }
+            }
+        }
+        
+        stage('Update Application for Node.js') {
+            steps {
+                echo 'Updating application for Node.js'
+                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                    sh '''
+                        git config user.email "k.santhosh.kumar090@gmail.com"
+                        git config user.name "me-santhosh"
+                        BUILD_NUMBER=${BUILD_NUMBER}
+                        sed -i "s|image: .*|image: ${DOCKER_IMAGE}|g" application.yaml
+                        git add application.yaml
+                        git commit -m "Update application image to version ${BUILD_NUMBER}"
+                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:${env.BRANCH_NAME}
+                    '''
+                }
+            }
+        }
+    }
+}
