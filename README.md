@@ -95,6 +95,9 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 
 
+
+
+
 #### Note: 
 I have defined this readme in such a way that anyone wants to follow and setup and perform these actions
 
