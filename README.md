@@ -88,7 +88,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 
 # 7) manifest files and CI/CD script
-## used manifest files provided in repo for service and deployment.
+## used manifest files provided in repo for service and deployment (under manifest folder)
 ## used configmap and confisecret provided in repo only for cluster.
 ## used provided jenkinsfile
 
